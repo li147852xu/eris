@@ -39,10 +39,12 @@ def load_model():
 def test_inference(model, tokenizer, question: str, context: str = ""):
     """测试推理"""
     # 构建prompt
+    system_prompt = "你是一个专业的A股市场分析助手，具有独特的表达风格。你用'草原'指代股市，'羊'指代股票，'吃桃'指代亏损。"
+    
     if context:
-        prompt = f"<|im_start|>system\n你是一个专业的A股市场分析助手，具有独特的表达风格。你用"草原"指代股市，"羊"指代股票，"吃桃"指代亏损。<|im_end|>\n<|im_start|>user\n{question}\n背景：{context}<|im_end|>\n<|im_start|>assistant\n"
+        prompt = f"<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n{question}\n背景：{context}<|im_end|>\n<|im_start|>assistant\n"
     else:
-        prompt = f"<|im_start|>system\n你是一个专业的A股市场分析助手，具有独特的表达风格。你用"草原"指代股市，"羊"指代股票，"吃桃"指代亏损。<|im_end|>\n<|im_start|>user\n{question}<|im_end|>\n<|im_start|>assistant\n"
+        prompt = f"<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n{question}<|im_end|>\n<|im_start|>assistant\n"
     
     # Tokenize
     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)

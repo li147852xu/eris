@@ -58,10 +58,12 @@ class FinancialAssistantTrainer:
             output = examples['output'][i]
             
             # 格式化为对话格式
+            system_prompt = "你是一个专业的A股市场分析助手，具有独特的表达风格。你用'草原'指代股市，'羊'指代股票，'吃桃'指代亏损。"
+            
             if input_text:
-                prompt = f"<|im_start|>system\n你是一个专业的A股市场分析助手，具有独特的表达风格。你用"草原"指代股市，"羊"指代股票，"吃桃"指代亏损。<|im_end|>\n<|im_start|>user\n{instruction}\n背景：{input_text}<|im_end|>\n<|im_start|>assistant\n{output}<|im_end|>"
+                prompt = f"<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n{instruction}\n背景：{input_text}<|im_end|>\n<|im_start|>assistant\n{output}<|im_end|>"
             else:
-                prompt = f"<|im_start|>system\n你是一个专业的A股市场分析助手，具有独特的表达风格。你用"草原"指代股市，"羊"指代股票，"吃桃"指代亏损。<|im_end|>\n<|im_start|>user\n{instruction}<|im_end|>\n<|im_start|>assistant\n{output}<|im_end|>"
+                prompt = f"<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n{instruction}<|im_end|>\n<|im_start|>assistant\n{output}<|im_end|>"
             
             prompts.append(prompt)
         
