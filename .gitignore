@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# 环境变量（包含API key）
+.env
+
+# 临时文件
+*.tmp
+*.bak
+*~
+
+# 不要ignore以下文件（确保数据被推送）
+!data/
+!outputs/
+!logs/
+!models/
+
+# 但ignore模型文件（太大）
+models/*.bin
+models/*.safetensors
+models/*/pytorch_model*.bin
+models/*/model*.safetensors
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# 其他
+.pytest_cache/
+.coverage
+htmlcov/
+
