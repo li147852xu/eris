@@ -211,6 +211,35 @@ tar -czf financial_assistant.tar.gz financial_assistant/
 **问题**: f-string中文引号冲突  
 **修复**: 改用单引号
 
+### Bug #6: RTX 5090 GPU不兼容 ✅
+**问题**: RTX 5090 (sm_120) 不兼容PyTorch 2.1  
+**症状**: `CUDA error: no kernel image is available for execution on the device`  
+**修复**: 自动检测RTX 5090并安装PyTorch nightly版本
+
+#### RTX 5090用户专用修复
+
+如果遇到GPU不兼容错误，运行：
+
+```bash
+./fix_rtx5090.sh
+```
+
+或手动修复：
+
+```bash
+# 卸载旧版本
+pip uninstall torch torchvision torchaudio -y
+
+# 安装nightly版本（支持RTX 5090）
+pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu124
+
+# 验证
+python3 -c "import torch; print(f'PyTorch: {torch.__version__}'); print(f'CUDA: {torch.cuda.is_available()}')"
+
+# 测试GPU
+python3 -c "import torch; x = torch.randn(100,100).cuda(); print('✅ GPU可用')"
+```
+
 ---
 
 ## 🔧 配置说明

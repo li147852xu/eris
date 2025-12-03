@@ -30,15 +30,25 @@ echo ""
 echo -e "${BLUE}[2/6] 安装PyTorch...${NC}"
 
 if command -v nvidia-smi &> /dev/null; then
-    echo "检测到NVIDIA GPU，安装CUDA 12.1版本..."
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+    # 检测GPU型号
+    GPU_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader | head -n 1)
+    echo "检测到GPU: $GPU_NAME"
+    
+    # RTX 5090需要PyTorch 2.5+ nightly版本
+    if [[ "$GPU_NAME" == *"5090"* ]] || [[ "$GPU_NAME" == *"50 "* ]]; then
+        echo "检测到RTX 5090，需要安装最新PyTorch nightly版本..."
+        pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu124
+    else
+        echo "安装PyTorch CUDA 12.1稳定版..."
+        pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+    fi
 else
     echo "未检测到GPU，安装CPU版本..."
     pip install torch torchvision torchaudio
 fi
 
 echo -e "${GREEN}✓ PyTorch安装完成${NC}"
-python3 -c "import torch; print(f'  PyTorch版本: {torch.__version__}'); print(f'  CUDA可用: {torch.cuda.is_available()}')"
+python3 -c "import torch; print(f'  PyTorch版本: {torch.__version__}'); print(f'  CUDA可用: {torch.cuda.is_available()}')" 2>/dev/null || echo "  验证中..."
 echo ""
 
 # ========================================
