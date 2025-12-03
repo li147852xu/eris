@@ -39,25 +39,66 @@ echo ""
 # 安装训练依赖
 # ========================================
 echo -e "${BLUE}安装训练依赖...${NC}"
+echo ""
 
-# 安装PyTorch（根据CUDA版本）
-if command -v nvidia-smi &> /dev/null; then
-    echo "检测到NVIDIA GPU，安装CUDA版本PyTorch..."
-    pip install -q torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+# 先检查是否已安装
+if python3 -c "import transformers, peft, torch" 2>/dev/null; then
+    echo -e "${GREEN}✓ 训练依赖已安装${NC}"
 else
-    echo "未检测到GPU，安装CPU版本PyTorch..."
-    pip install -q torch torchvision torchaudio
+    echo "开始安装训练依赖（显示详细输出）..."
+    echo ""
+    
+    # 升级pip
+    echo "[1/7] 升级pip..."
+    pip install --upgrade pip setuptools wheel
+    
+    # 安装PyTorch
+    echo ""
+    echo "[2/7] 安装PyTorch..."
+    if command -v nvidia-smi &> /dev/null; then
+        echo "检测到NVIDIA GPU，安装CUDA 12.1版本..."
+        pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+    else
+        echo "安装CPU版本..."
+        pip install torch torchvision torchaudio
+    fi
+    
+    # 验证PyTorch
+    python3 -c "import torch; print(f'✓ PyTorch {torch.__version__} 已安装')"
+    
+    # 安装transformers
+    echo ""
+    echo "[3/7] 安装transformers..."
+    pip install transformers
+    python3 -c "import transformers; print(f'✓ transformers {transformers.__version__} 已安装')"
+    
+    # 安装datasets
+    echo ""
+    echo "[4/7] 安装datasets..."
+    pip install datasets
+    python3 -c "import datasets; print(f'✓ datasets {datasets.__version__} 已安装')"
+    
+    # 安装peft
+    echo ""
+    echo "[5/7] 安装peft..."
+    pip install peft
+    python3 -c "import peft; print(f'✓ peft {peft.__version__} 已安装')"
+    
+    # 安装accelerate
+    echo ""
+    echo "[6/7] 安装accelerate..."
+    pip install accelerate
+    python3 -c "import accelerate; print(f'✓ accelerate {accelerate.__version__} 已安装')"
+    
+    # 安装其他
+    echo ""
+    echo "[7/7] 安装其他依赖..."
+    pip install sentencepiece protobuf scipy
+    
+    echo ""
+    echo -e "${GREEN}✓ 所有依赖安装完成${NC}"
 fi
 
-# 安装其他训练依赖
-pip install -q transformers datasets peft accelerate sentencepiece protobuf
-
-# bitsandbytes需要CUDA，可选安装
-if command -v nvidia-smi &> /dev/null; then
-    pip install -q bitsandbytes || echo "⚠ bitsandbytes安装失败，跳过（不影响训练）"
-fi
-
-echo -e "${GREEN}✓ 依赖安装完成${NC}"
 echo ""
 
 # ========================================
