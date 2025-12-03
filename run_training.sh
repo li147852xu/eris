@@ -40,7 +40,22 @@ echo ""
 # ========================================
 echo -e "${BLUE}安装训练依赖...${NC}"
 
-pip install -q transformers torch datasets peft accelerate bitsandbytes sentencepiece
+# 安装PyTorch（根据CUDA版本）
+if command -v nvidia-smi &> /dev/null; then
+    echo "检测到NVIDIA GPU，安装CUDA版本PyTorch..."
+    pip install -q torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+else
+    echo "未检测到GPU，安装CPU版本PyTorch..."
+    pip install -q torch torchvision torchaudio
+fi
+
+# 安装其他训练依赖
+pip install -q transformers datasets peft accelerate sentencepiece protobuf
+
+# bitsandbytes需要CUDA，可选安装
+if command -v nvidia-smi &> /dev/null; then
+    pip install -q bitsandbytes || echo "⚠ bitsandbytes安装失败，跳过（不影响训练）"
+fi
 
 echo -e "${GREEN}✓ 依赖安装完成${NC}"
 echo ""

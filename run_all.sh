@@ -41,7 +41,9 @@ echo ""
 echo -e "${BLUE}[步骤 $STEP] 安装依赖包...${NC}"
 STEP=$((STEP+1))
 
-pip install -q -r requirements.txt
+# 只安装数据生成需要的包（轻量级）
+pip install --upgrade pip -q
+pip install pandas numpy requests python-dotenv loguru tqdm akshare openai -q
 echo -e "${GREEN}✓ 依赖安装完成${NC}"
 echo ""
 
