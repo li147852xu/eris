@@ -84,6 +84,19 @@ class FinancialAssistantTrainer:
         """设置模型和tokenizer"""
         logger.info(f"加载基座模型: {self.base_model}")
         
+        # 检查本地缓存
+        from pathlib import Path
+        cache_dir = Path.home() / ".cache" / "huggingface" / "hub"
+        model_cache_name = self.base_model.replace("/", "--")
+        
+        cached_model_dirs = list(cache_dir.glob(f"models--{model_cache_name}*"))
+        
+        if cached_model_dirs:
+            logger.info(f"✓ 检测到本地缓存模型，跳过下载")
+            logger.info(f"  缓存位置: {cached_model_dirs[0]}")
+        else:
+            logger.info(f"首次使用，需要下载模型（约15GB，耗时10-20分钟）")
+        
         # 加载tokenizer
         tokenizer = AutoTokenizer.from_pretrained(
             self.base_model,
@@ -95,13 +108,16 @@ class FinancialAssistantTrainer:
         if tokenizer.pad_token is None:
             tokenizer.pad_token = tokenizer.eos_token
         
-        # 加载模型
+        # 加载模型（会自动使用缓存）
+        logger.info("加载模型权重...")
         model = AutoModelForCausalLM.from_pretrained(
             self.base_model,
             torch_dtype=torch.float16,
             device_map="auto",
             trust_remote_code=True
         )
+        
+        logger.info("✓ 模型加载完成")
         
         # 配置LoRA
         lora_config = LoraConfig(
@@ -121,16 +137,21 @@ class FinancialAssistantTrainer:
     
     def train(self):
         """开始训练"""
+        logger.info("=" * 60)
         logger.info("开始训练金融助手模型")
+        logger.info("=" * 60)
         
         # 加载数据
+        logger.info("\n[1/5] 加载训练数据...")
         dataset = self.load_training_data()
+        logger.info(f"✓ 已加载 {len(dataset)} 个训练样本")
         
         # 设置模型和tokenizer
+        logger.info("\n[2/5] 加载模型和tokenizer...")
         model, tokenizer = self.setup_model_and_tokenizer()
         
         # 数据预处理
-        logger.info("预处理训练数据")
+        logger.info("\n[3/5] 预处理训练数据...")
         tokenized_dataset = dataset.map(
             lambda examples: self.preprocess_data(examples, tokenizer),
             batched=True,
@@ -160,6 +181,7 @@ class FinancialAssistantTrainer:
         )
         
         # 创建Trainer
+        logger.info("\n[4/5] 创建训练器...")
         trainer = Trainer(
             model=model,
             args=training_args,
@@ -167,16 +189,22 @@ class FinancialAssistantTrainer:
             data_collator=data_collator,
         )
         
+        logger.info("✓ 训练器创建完成")
+        
         # 开始训练
-        logger.info("开始训练...")
+        logger.info("\n[5/5] 开始训练...")
+        logger.info("=" * 60)
         trainer.train()
         
         # 保存模型
+        logger.info("\n" + "=" * 60)
         logger.info(f"保存模型到: {self.output_dir}")
         trainer.save_model()
         tokenizer.save_pretrained(self.output_dir)
         
-        logger.info("训练完成！")
+        logger.info("=" * 60)
+        logger.info("✅ 训练完成！")
+        logger.info("=" * 60)
 
 
 def main():
